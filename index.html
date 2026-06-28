@@ -1,0 +1,106 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <title>Sarvopari Dham Cloud</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at center, #2b1b0e 0%, #0a0a0a 100%); color: #f0e6d2; margin: 0; text-align: center; min-height: 100vh; }
+    .nav { background: rgba(20, 20, 20, 0.9); padding: 10px; display: flex; justify-content: space-around; font-weight: bold; border-bottom: 2px solid #c8963e; }
+    .nav div { color: #000; background: linear-gradient(145deg, #c8963e, #8b6914); padding: 8px 20px; border-radius: 20px; box-shadow: 0 0 10px rgba(200, 150, 62, 0.5); }
+    h2 { margin: 20px 0 10px; color: #e6c27a; font-size: 18px; text-transform: uppercase; }
+    #status { color: #50e3c2; font-weight: bold; font-size: 14px; margin-bottom: 15px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; max-width: 800px; margin: auto; }
+    .card { background: linear-gradient(145deg, rgba(40,30,20,0.8), rgba(20,15,10,0.9)); padding: 10px; border-radius: 10px; border: 1px solid rgba(200,150,62,0.3); }
+    h4 { margin: 0 0 10px; color: #f9d976; font-size: 12px; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn { border: none; padding: 8px 0; border-radius: 20px; flex: 1; font-weight: bold; cursor: pointer; color: #fff; font-size: 11px; transition: 0.3s; box-shadow: 0 3px 5px rgba(0,0,0,0.4); }
+    .on-m { background: #388E3C; box-shadow: inset 0 4px 12px rgba(0,0,0,0.8); }
+    .off-m { background: #D32F2F; }
+    .on-a { background: #0097A7; box-shadow: inset 0 4px 12px rgba(0,0,0,0.8); }
+    .off-a { background: #7B1FA2; }
+    .a-on { background: #F57C00; box-shadow: inset 0 4px 12px rgba(0,0,0,0.8); }
+    .a-off { background: #1976D2; }
+    .footer { color: #ffffff; font-size: 18px; margin-top: 30px; padding-bottom: 30px; font-weight: bold; letter-spacing: 1px; text-shadow: 0 0 8px #ff00ff, 0 0 15px #ff00ff; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+  <div class='nav'><div>GLOBAL CLOUD DASHBOARD</div></div>
+  <h2>🔴🙏 SARVOPARI DHAM 🙏🔴</h2>
+  <div id='status'>Connecting to Cloud... ⏳</div>
+  <div class='grid' id='buttonsGrid'></div>
+  <div class='footer'>SARVOPARI DHAM LIGHT REMOTE</div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoPnrydmBiFCG8FP52Sy_jsRBb1CyUfaM",
+      authDomain: "sarvopari-liths.firebaseapp.com",
+      databaseURL: "https://sarvopari-liths-default-rtdb.firebaseio.com",
+      projectId: "sarvopari-liths",
+      storageBucket: "sarvopari-liths.firebasestorage.app",
+      messagingSenderId: "1010340476153",
+      appId: "1:1010340476153:web:0874ceee4926c0cec75e28"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const names = ["1. Jalar 1", "2. Jalar 2", "3. Jalar 3", "4. Zumar 1", "5. Zumar 2", "6. Zumar 3", "7. Ghumat", "8. Border", "9. Lamp 2", "10. Vakta Light"];
+    let relayState = [0,0,0,0,0,0,0,0,0,0];
+    let manualMode = [false,false,false,false,false,false,false,false,false,false];
+
+    function buildUI() {
+      let html = "";
+      for(let i=0; i<10; i++){
+        html += `<div class='card'><h4>${names[i]}</h4><div class='btn-row'><button id='b${i}' class='btn off-m' onclick='toggleRelay(${i})'>Wait</button><button id='a${i}' class='btn a-off' onclick='toggleAuto(${i})'>Wait</button></div></div>`;
+      }
+      document.getElementById('buttonsGrid').innerHTML = html;
+    }
+
+    function updateUI() {
+      for(let i=0; i<10; i++){
+        let b = document.getElementById(`b${i}`);
+        let a = document.getElementById(`a${i}`);
+        let isM = manualMode[i]; let isO = relayState[i] == 1;
+        b.innerHTML = isO ? (isM ? "ON" : "ON (Auto)") : (isM ? "OFF" : "OFF (Auto)");
+        b.className = isO ? (isM ? "btn on-m" : "btn on-a") : (isM ? "btn off-m" : "btn off-a");
+        a.innerHTML = isM ? "AUTO" : "AUTO (ON)";
+        a.className = isM ? "btn a-off" : "btn a-on";
+      }
+    }
+
+    function toggleRelay(id) {
+      manualMode[id] = true;
+      relayState[id] = relayState[id] == 1 ? 0 : 1;
+      db.ref('SarvopariDham/Relays/R' + id).set(relayState[id]);
+      db.ref('SarvopariDham/Modes/M' + id).set(true);
+    }
+
+    function toggleAuto(id) {
+      manualMode[id] = false;
+      db.ref('SarvopariDham/Modes/M' + id).set(false);
+    }
+
+    function listenToCloud() {
+      const statusText = document.getElementById('status');
+      firebase.database().ref(".info/connected").on("value", (snap) => {
+        statusText.innerHTML = snap.val() === true ? "🟢 Connected to Global Cloud" : "🔴 Reconnecting...";
+      });
+
+      db.ref('SarvopariDham').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+          if(data.Relays) for(let i=0; i<10; i++) relayState[i] = data.Relays['R'+i] || 0;
+          if(data.Modes) for(let i=0; i<10; i++) manualMode[i] = data.Modes['M'+i] || false;
+          updateUI();
+        }
+      });
+    }
+
+    window.onload = () => { buildUI(); listenToCloud(); };
+  </script>
+</body>
+</html>
