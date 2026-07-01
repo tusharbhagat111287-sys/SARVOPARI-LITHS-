@@ -2,72 +2,94 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <meta charset='UTF-8'>
-  <meta name='viewport' content='width=device-width, initial-scale=1'>
-  <title>Sarvopari Dham Cloud</title>
-  <style>
-    body { font-family: sans-serif; background: #121212; color: #fff; text-align: center; margin:0; padding-bottom: 50px; }
-    h2 { margin: 20px 0 10px; color: #e6c27a; font-size: 18px; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; max-width: 600px; margin: auto; }
-    .card { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
-    h4 { margin: 0 0 10px; color: #f9d976; font-size: 14px; }
-    .btn-row { display: flex; gap: 10px; }
-    .btn { padding: 10px 0; border-radius: 8px; flex: 1; font-weight: bold; border: none; cursor: pointer; color: white; transition:0.2s;}
-    .on { background: #388E3C; } .off { background: #D32F2F; }
-    .a-on { background: #0097A7; } .a-off { background: #1976D2; }
-    #status { color: #50e3c2; font-weight: bold; font-size: 14px; margin-bottom: 15px; }
-  </style>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <title>Sarvopari Dham Cloud</title>
+  <style>
+    /* સુંદર ડાર્ક થીમ ડિઝાઇન */
+    body { font-family: sans-serif; background: #121212; color: #fff; text-align: center; margin:0; padding-bottom: 50px; }
+    h2 { margin: 20px 0 10px; color: #e6c27a; font-size: 18px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; max-width: 600px; margin: auto; }
+    .card { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444; }
+    h4 { margin: 0 0 10px; color: #f9d976; font-size: 14px; }
+    .btn-row { display: flex; gap: 10px; }
+    .btn { padding: 10px 0; border-radius: 8px; flex: 1; font-weight: bold; border: none; cursor: pointer; color: white; transition:0.2s;}
+    .on { background: #388E3C; } .off { background: #D32F2F; }
+    .a-on { background: #0097A7; } .a-off { background: #1976D2; }
+    #status { color: #50e3c2; font-weight: bold; font-size: 14px; margin-bottom: 15px; }
+  </style>
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-  <h2>🔴🙏 SARVOPARI DHAM 🙏🔴</h2>
-  <div id='status'>Connecting to Cloud... ⏳</div>
-  <div class='grid' id='ui'></div>
 
-  <script>
-    firebase.initializeApp({apiKey: "AIzaSyAoPnrydmBiFCG8FP52Sy_jsRBb1CyUfaM", databaseURL: "https://sarvopari-liths-default-rtdb.firebaseio.com"});
-    const db = firebase.database();
-    const n = ["1. Jalar 1", "2. Jalar 2", "3. Jalar 3", "4. Zumar 1", "5. Zumar 2", "6. Zumar 3", "7. Ghumat", "8. Border", "9. Lamp 2", "10. Vakta Light"];
-    
-    const ui = document.getElementById('ui');
-    for(let i=0; i<10; i++) ui.innerHTML += `<div class='card'><h4>${n[i]}</h4><div class='btn-row'><button id='b${i}' class='btn off' onclick='cmd("toggle", ${i}, "b${i}")'>Wait</button><button id='a${i}' class='btn a-off' onclick='cmd("auto", ${i}, "a${i}")'>Wait</button></div></div>`;
+  <h2>🔴🙏 SARVOPARI DHAM 🙏🔴</h2>
+  <div id='status'>Connecting to Cloud... ⏳</div>
+  <div class='grid' id='ui'></div>
 
-    function cmd(action, id, btnId) {
-      document.getElementById(btnId).innerText = "⏳";
-      let trig = Math.floor(Math.random() * 100000) + 1; 
-      db.ref('SarvopariDham/Command').set({ act: action, id: id, trig: trig });
-    }
+  <script>
+    // ફાયરબેઝ કનેક્શન સેટઅપ
+    firebase.initializeApp({
+      apiKey: "AIzaSyAoPnrydmBiFCG8FP52Sy_jsRBb1CyUfaM", 
+      databaseURL: "https://sarvopari-liths-default-rtdb.firebaseio.com"
+    });
+    const db = firebase.database();
+    
+    // તમારા ૧૦ ડિવાઇસના નામ
+    const n = ["1. Jalar 1", "2. Jalar 2", "3. Jalar 3", "4. Zumar 1", "5. Zumar 2", "6. Zumar 3", "7. Ghumat", "8. Border", "9. Lamp 2", "10. Vakta Light"];
+    
+    // ગ્રીડ યુઝર ઇન્ટરફેસ (UI) બનાવટ
+    const ui = document.getElementById('ui');
+    for(let i=0; i<10; i++) {
+      ui.innerHTML += `<div class='card'>
+        <h4>${n[i]}</h4>
+        <div class='btn-row'>
+          <button id='b${i}' class='btn off' onclick='cmd("toggle", ${i}, "b${i}")'>Wait</button>
+          <button id='a${i}' class='btn a-off' onclick='cmd("auto", ${i}, "a${i}")'>Wait</button>
+        </div>
+      </div>`;
+    }
 
-    db.ref(".info/connected").on("value", (snap) => {
-      document.getElementById('status').innerText = snap.val() ? "🟢 Connected to Cloud" : "🔴 Offline";
-    });
+    // બટન ક્લિક કરવા પર ક્લાઉડમાં કમાન્ડ મોકલવાનું ફંક્શન
+    function cmd(action, id, btnId) {
+      document.getElementById(btnId).innerText = "⏳";
+      let trig = Math.floor(Math.random() * 100000) + 1; 
+      db.ref('SarvopariDham/Command').set({ act: action, id: id, trig: trig });
+    }
 
-// લાઈવ સ્ટેટસ વાંચવા માટેનો નવો અને સાચો કોડ
+    // ઓનલાઇન/ઓફલાઇન સ્ટેટસ ચેક
+    db.ref(".info/connected").on("value", (snap) => {
+      document.getElementById('status').innerText = snap.val() ? "🟢 Connected to Cloud" : "🔴 Offline";
+    });
+
+    // ફાયરબેઝના સાચા ફોલ્ડર્સ (Relays અને Modes) માંથી લાઈવ ડેટા રીડ કરવો
     db.ref('SarvopariDham').on('value', snap => {
       let d = snap.val();
       if(d) {
-        // ફાયરબેઝના સાચા ફોલ્ડર્સમાંથી ડેટા લીધો
         let relays = d.Relays || {};
         let modes = d.Modes || {};
         
         for(let i=0; i<10; i++) {
-          // ડેટાબેઝના સ્ટ્રક્ચર પ્રમાણે R0, R1... ચેક કરશે
+          // ડેટાબેઝમાંથી R0, R1... અને M0, M1... ની વેલ્યુ ચેક કરવી
           let isO = (relays[`R${i}`] == 1);
-          
-          // Modes ની અંદર કી M0, M1 હોઈ શકે અથવા ખાલી 0, 1 હોઈ શકે, એટલે બંને માટે સેફ કોડ રાખ્યો છે
           let isM = (modes[`M${i}`] == 1 || modes[i] == 1);
           
-          let b = document.getElementById(`b${i}`), a = document.getElementById(`a${i}`);
+          let b = document.getElementById(`b${i}`);
+          let a = document.getElementById(`a${i}`);
+          
           if(b && a) {
+            // રીલે બટનનું લખાણ અને કલર અપડેટ
             b.innerText = isO ? (isM ? "ON" : "ON (Auto)") : (isM ? "OFF" : "OFF (Auto)");
             b.className = isO ? "btn on" : "btn off";
+            
+            // ઓટો મોડ બટનનું લખાણ અને કલર અપડેટ
             a.innerText = isM ? "AUTO" : "AUTO (ON)";
             a.className = isM ? "btn a-off" : "btn a-on";
           }
         }
       }
     });
-  </script>
+  </script>
 </body>
 </html>
